@@ -1,0 +1,3 @@
+polars
+psycopg2-binary # Or 'asyncpg' for async, or 'SQLAlchemy' if you prefer ORM
+requests # If your script downloads data from external sources
