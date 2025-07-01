@@ -1,0 +1,8 @@
+plotly[express]
+nbformat
+dash
+polars 
+geopandas 
+pandas
+osmnx
+dagster
