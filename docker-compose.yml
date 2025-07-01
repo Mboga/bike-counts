@@ -1,0 +1,71 @@
+
+services:
+  # Your Jupyter Notebook service for data exploration and interactive cleaning
+  jupyter_notebook:
+    build:
+      context: ./docker/jupyter # <<<<<<<<<< IMPORTANT CHANGE: Context is docker/jupyter
+      dockerfile: Dockerfile     # Looks for 'Dockerfile' inside docker/jupyter
+    ports:
+      - "8888:8888" # Map host port 8888 to container port 8888 (Jupyter's default)
+    volumes:
+      # Mount your local 'notebooks' folder to /home/jovyan/work in the container
+      - ./notebooks:/home/jovyan/work
+      # Mount your local 'scripts' folder for access to your preprocessing.py in Jupyter
+      - ./scripts:/home/jovyan/scripts # <<< NEW: Mount scripts folder for Jupyter access
+      # Mount your local 'raw_data' folder for access to unclean data
+      - ./raw_data:/home/jovyan/raw_data
+      # Mount your local 'output' folder for saving/loading final CSVs
+      - ./output:/home/jovyan/output
+    depends_on:
+      - db # Ensure the database starts before Jupyter
+    environment:
+      # Database connection details passed as environment variables
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USER: user
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: my_database
+      JUPYTER_TOKEN: "" # Set to empty string to disable token for local development
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+
+  # Your Python application service (for running the preprocessing script)
+  app:
+    build:
+      context: ./docker/python # <<<<<<<<<< IMPORTANT CHANGE: Context is docker/python
+      dockerfile: Dockerfile    # Looks for 'Dockerfile' inside docker/python
+    depends_on:
+      - db # Ensure the database starts before the app script
+    environment:
+      # Database connection details passed as environment variables
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USER: user
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: my_database
+    volumes:
+      # Mount the actual scripts folder into the app container
+      - ./scripts:/app/scripts # <<< NEW: Mount scripts folder
+      # Raw data accessible to the script
+      - ./raw_data:/app/raw_data
+      # Output CSV saved here by the script
+      - ./output:/app/output
+    # Command to run your preprocessing script once.
+    # Note the path: it's /app/scripts/preprocessing.py inside the container.
+    command: python /app/scripts/preprocessing.py
+
+  # Your PostgreSQL database service (unchanged from previous)
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: my_database
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db_init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
