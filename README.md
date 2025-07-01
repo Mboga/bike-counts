@@ -12,6 +12,12 @@ Public dataset of brussels bike counts for the year 2019 - 2024
 
 # development environment
 
+Clone the repository
+```
+git clone https://github.com/Mboga/bike-counts.git
+cd bike-counts
+```
+
 we will do the development using docker-compose.
 
 - Verify docker is running 
