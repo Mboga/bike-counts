@@ -54,9 +54,9 @@ http://127.0.0.1:8888/lab?token=2d31d5eacf2c4ef3f17fdc9b620a085d7270291b799462e0
 The data contains the following attributes:
 ```
 id SERIAL PRIMARY KEY,
-    timestamp TIMESTAMP 
+    timestamp TIMESTAMP, 
     device_name VARCHAR(255), 
-    count BIGINT,            t
+    count BIGINT,
     average_speed DOUBLE PRECISION,
     longitude DOUBLE PRECISION,
     latitude DOUBLE PRECISION,
